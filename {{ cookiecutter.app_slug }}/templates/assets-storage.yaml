@@ -1,0 +1,18 @@
+{% raw -%}
+
+{{- if .Values.useLocalAssetVolume -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-path-pvc
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+{{ end }}
+
+{%- endraw %}

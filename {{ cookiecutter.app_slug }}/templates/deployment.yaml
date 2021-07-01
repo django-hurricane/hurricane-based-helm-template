@@ -1,0 +1,110 @@
+{% raw -%}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
+  labels:
+    {{- include {% endraw %}"{{ cookiecutter.app_slug }}.labels"{% raw %}  . | nindent 4 }}
+    {{- if .Values.deploymentLabels }}
+    {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml .Values.deploymentAnnotations | nindent 4 }}
+  {{- end}}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %}  . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end}}
+      labels:
+        {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %} . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        - name: robot-pull-secret
+      serviceAccountName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.serviceAccountName"{% raw %} . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.useLocalAssetVolume }}
+      volumes:
+        - name: assets
+          persistentVolumeClaim:
+            claimName: local-path-pvc
+      {{ end }}
+      containers:
+        - name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.useLocalAssetVolume }}
+          volumeMounts:
+            - mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
+              name: assets
+          {{ end }}
+          command: ["/bin/sh","-c"]
+          args: ["python manage.py serve
+                  --command 'migrate'
+                  --command 'collectstatic --no-input'
+                  --port 80
+                  {{- if .Values.useLocalAssetVolume }}
+                  --static
+                  {{ end -}}
+                 "]
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: 81
+            periodSeconds: 10
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 81
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap
+      initContainers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['python', 'manage.py', 'migrate']
+          env:
+            {{- include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
+
+{%- endraw %}

@@ -1,0 +1,13 @@
+{
+    "app_slug": "project_name",
+    "description": "Chart for the {{ cookiecutter.app_slug.replace(' ', '_') }} service",
+    "image_repo": "quay.io/blueshoe/dj-hurricane-base",
+    "registry_username": "",
+    "registry_password": "",
+    "postgresql_version": "10.5.1",
+    "encrypt_secret_values": "Y",
+    "key_user": "superuser",
+    "key_email": "{{ cookiecutter.app_slug }}@acme.local",
+    "key_passphrase": "",
+    "__alphabet": "abcdefghijklmnopqrstuvwxyz1234567890"
+}

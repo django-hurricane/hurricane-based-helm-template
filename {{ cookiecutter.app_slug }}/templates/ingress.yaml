@@ -1,0 +1,34 @@
+{% raw -%}
+
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+  {{- range .Values.ingress.tls }}
+    - {{ . }}
+  {{- end }}
+    secretName: letsencrypt-prod
+  {{- end }}
+  rules:
+    {{- range $host, $backend := .Values.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+        - path: {{ $backend.path }}
+          backend:
+            serviceName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} $ }}
+            servicePort: {{ $backend.servicePort }}
+    {{- end}}
+{{- end }}
+
+{%- endraw %}

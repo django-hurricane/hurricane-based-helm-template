@@ -1,0 +1,19 @@
+{% raw %}
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}-test-connection"
+  labels:
+    {{- include {% endraw %}"{{ cookiecutter.app_slug }}.labels"{% raw %} . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
+
+{% endraw %}

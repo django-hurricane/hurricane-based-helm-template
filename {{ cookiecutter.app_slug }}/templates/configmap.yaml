@@ -1,0 +1,18 @@
+{% raw -%}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {% endraw %}{{ cookiecutter.app_slug }}-configmap{% raw %}
+  namespace: {{ .Release.Namespace }}
+data:
+  {{- range $key, $val := .Values.environmentVariables }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+  {{- if .Values.useLocalAssetVolume }}
+  DJANGO_STATIC_ROOT: {{ .Values.assets.assetsMountPath }}{{ .Values.assets.staticPathPrefix }}
+  DJANGO_MEDIA_ROOT: {{ .Values.assets.assetsMountPath }}{{ .Values.assets.mediaPathPrefix }}
+  {{ end }}
+
+
+{%- endraw %}

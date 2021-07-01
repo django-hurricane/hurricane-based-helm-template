@@ -1,0 +1,6 @@
+{% raw %}
+
+URL of {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap: {{ .Values.ingress.host }}
+(in local development you also need to add the port where k8s is running)
+
+{% endraw %}
