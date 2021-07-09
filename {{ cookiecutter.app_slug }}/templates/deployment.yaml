@@ -54,28 +54,33 @@ spec:
           args: ["python manage.py serve
                   --command 'migrate'
                   --command 'collectstatic --no-input'
-                  --port 80
+                  --port {{ .Values.service.port }}
+                  --probe-port 9001
                   {{- if .Values.useLocalAssetVolume }}
                   --static
                   {{ end -}}
                  "]
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /alive
-              port: 81
+              port: 9001
             periodSeconds: 10
             failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /ready
-              port: 81
+              port: 9001
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: 9001
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
