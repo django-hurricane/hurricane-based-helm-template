@@ -34,6 +34,6 @@ ingress:
     {{ cookiecutter.app_slug }}.dev.127.0.0.1.nip.io:
       path: /
       serviceName: {{ cookiecutter.app_slug }}
-      servicePort: 80
+      servicePort: 8080
   tls: []
   basicAuthExempt: []
