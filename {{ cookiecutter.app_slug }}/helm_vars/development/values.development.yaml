@@ -41,5 +41,6 @@ rabbitmq:
   auth:
     username: {{ cookiecutter.app_slug }}
     existingPasswordSecret: {{ cookiecutter.app_slug }}-rabbitmq-custom
+    existingErlangSecret: {{ cookiecutter.app_slug }}-rabbitmq-custom
 
 {% endif -%}
