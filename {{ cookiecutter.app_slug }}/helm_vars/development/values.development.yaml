@@ -29,11 +29,17 @@ ingress:
   enabled: true
   enableLetsencrypt: false
   annotations: []
-  annotationsBasicAuthExempt: []
   hosts:
     {{ cookiecutter.app_slug }}.dev.127.0.0.1.nip.io:
       path: /
       serviceName: {{ cookiecutter.app_slug }}
       servicePort: 8080
   tls: []
-  basicAuthExempt: []
+
+{% if cookiecutter.use_rabbitmq == "yes" -%}
+rabbitmq:
+  auth:
+    username: {{ cookiecutter.app_slug }}
+    existingPasswordSecret: {{ cookiecutter.app_slug }}-rabbitmq-custom
+
+{% endif -%}

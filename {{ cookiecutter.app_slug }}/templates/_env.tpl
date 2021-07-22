@@ -57,4 +57,36 @@ Wrap env variables
       key: DJANGO_AWS_REGION
 {{- end -}}
 
+{{/*
+Wrap env variables for amqp-connect (rabbitmq-initContainer)
+*/}}
+{{- define {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+- name: AMQP_HOST
+  valueFrom:
+    secretKeyRef:
+      name: {{ $name }}-rabbitmq-custom
+      key: rabbitmq-host
+- name: AMQP_VHOST
+  valueFrom:
+    secretKeyRef:
+      name: {{ $name }}-rabbitmq-custom
+      key: rabbitmq-vhost
+- name: AMQP_USERNAME
+  value: {{ .Values.rabbitmq.auth.username | quote }}
+- name: AMQP_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ $name }}-rabbitmq-custom
+      key: rabbitmq-password
+- name: AMQP_PORT
+  value: "5672"
+- name: SLEEP_DURATION
+  value: "5"
+- name: MAX_RETRIES
+  value: "10"
+- name: SENTRY_DSN
+  value: {{ .Values.sentryDSN | quote }}
+{{- end -}}
+
 {%- endraw %}

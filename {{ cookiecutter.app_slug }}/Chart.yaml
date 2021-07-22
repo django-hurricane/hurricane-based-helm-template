@@ -17,3 +17,9 @@ dependencies:
   version: {{ cookiecutter.postgresql_version }}
   repository: https://charts.bitnami.com/bitnami/
   condition: global.postgresql.enabled
+{%- if cookiecutter.use_rabbitmq == "yes" %}
+- name: rabbitmq
+  version: {{ cookiecutter.rabbitmq_version }}
+  repository: https://charts.bitnami.com/bitnami/
+  condition: global.postgresql.enabled
+{%- endif %}

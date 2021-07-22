@@ -1,14 +1,13 @@
 {% raw -%}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
+  name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullnameWorker"{% raw %} . }}
   labels:
-    {{- include {% endraw %}"{{ cookiecutter.app_slug }}.labels"{% raw %}  . | nindent 4 }}
+    {{- include {% endraw %}"{{ cookiecutter.app_slug }}.labelsWorker"{% raw %} . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
     {{- toYaml .Values.deploymentLabels | nindent 4 }}
-    {{- end }}
+    {{- end}}
   {{- if .Values.deploymentAnnotations }}
   annotations:
     {{- toYaml .Values.deploymentAnnotations | nindent 4 }}
@@ -18,7 +17,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %}  . | nindent 6 }}
+      {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabelsWorker"{% raw %} . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -26,61 +25,57 @@ spec:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end}}
       labels:
-        {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %} . | nindent 8 }}
+        {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabelsWorker"{% raw %} . | nindent 8 }}
     spec:
       imagePullSecrets:
         - name: robot-pull-secret
       serviceAccountName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.serviceAccountName"{% raw %} . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.useLocalAssetVolume }}
-      volumes:
-        - name: assets
-          persistentVolumeClaim:
-            claimName: local-path-pvc
-      {{ end }}
       containers:
-        - name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
+        - name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullnameWorker"{% raw %} . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.useLocalAssetVolume }}
-          volumeMounts:
-            - mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
-              name: assets
-          {{ end }}
-          command: ["/bin/sh","-c"]
-          args: ["python manage.py serve
-                  --command 'migrate'
-                  --command 'collectstatic --no-input'
-                  --port {{ .Values.service.port }}
-                  --probe-port 9001
-                  {{- if .Values.useLocalAssetVolume }}
-                  --static
-                  {{ end -}}
-                 "]
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /alive
-              port: 9001
-            periodSeconds: 10
-            failureThreshold: 10
+            exec:
+              # bash is needed to replace the environment variable
+              command: [
+                "bash",
+                "-c",
+                "celery inspect ping -A {% endraw %}{{ cookiecutter.app_slug }}{% raw %}.configuration.celery.app -d celery@$HOSTNAME"
+              ]
+            periodSeconds: 60  # default is quite often and celery uses a lot cpu/ram then.
+            timeoutSeconds: 10  # default is too low
+            failureThreshold: 8
+#          startupProbe:
+#            exec:
+#              # bash is needed to replace the environment variable
+#              command: [
+#                "bash",
+#                "-c",
+#                "celery inspect ping -A {% endraw %}{{ cookiecutter.app_slug }}{% raw %}.configuration.celery.app -d celery@$HOSTNAME"
+#              ]
+#            periodSeconds: 20
+#            timeoutSeconds: 10
+#            failureThreshold: 15
           readinessProbe:
-            httpGet:
-              path: /ready
-              port: 9001
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            exec:
+              # bash is needed to replace the environment variable
+              command: [
+                "bash",
+                "-c",
+                "celery inspect ping -A {% endraw %}{{ cookiecutter.app_slug }}{% raw %}.configuration.celery.app -d celery@$HOSTNAME"
+              ]
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
             failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /startup
-              port: 9001
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
@@ -88,7 +83,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap
-      {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
       initContainers:
         - name: init-rabbitmq-queue
           image: "{{ .Values.amqpConnect.repository }}:{{ .Values.amqpConnect.tag }}"
@@ -97,8 +91,6 @@ spec:
           command: ['python', '-m', 'check_amqp_connection.py']
           env:
             {{- include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
-
-      {% endif -%}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -111,6 +103,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-
-
-{%- endraw %}
+{%- endraw -%}

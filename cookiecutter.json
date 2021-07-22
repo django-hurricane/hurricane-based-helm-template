@@ -5,9 +5,14 @@
     "registry_username": "",
     "registry_password": "",
     "postgresql_version": "10.5.1",
-    "encrypt_secret_values": "Y",
+    "encrypt_secret_values": ["yes", "no"],
     "key_user": "superuser",
     "key_email": "{{ cookiecutter.app_slug }}@acme.local",
     "key_passphrase": "",
+    "use_celery_worker": ["yes", "no"],
+    "use_celery_beat": ["yes", "no"],
+    "use_rabbitmq": ["yes", "no"],
+    "rabbitmq_version": "8.18.1",
+    "ampq_connect_image_repo": "quay.io/blueshoe/amqp-connect",
     "__alphabet": "abcdefghijklmnopqrstuvwxyz1234567890"
 }

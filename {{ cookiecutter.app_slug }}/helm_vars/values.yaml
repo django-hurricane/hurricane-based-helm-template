@@ -7,6 +7,13 @@ replicaCount: 1
 image:
   repository: {{ cookiecutter.image_repo }}
 
+{% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
+amqpConnect:
+  repository: {{ cookiecutter.ampq_connect_image_repo }}
+  tag: master
+  pullPolicy: Always
+
+{% endif -%}
 
 serviceAccount:
   # Specifies whether a service account should be created
