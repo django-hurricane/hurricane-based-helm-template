@@ -4,12 +4,11 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: local-path-pvc
+  name: {% endraw %}{{ cookiecutter.app_slug }}-pvc{% raw %}
   namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: local-path
   resources:
     requests:
       storage: 2Gi

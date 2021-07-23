@@ -37,7 +37,7 @@ spec:
       volumes:
         - name: assets
           persistentVolumeClaim:
-            claimName: local-path-pvc
+            claimName: {% endraw %}{{ cookiecutter.app_slug }}-pvc{% raw %}
       {{ end }}
       containers:
         - name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
