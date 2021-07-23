@@ -38,6 +38,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["celery"]
+          args: ["-A", "configuration.celery.app",
+                 "beat",
+                 "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]
           ports:
             - name: http
               containerPort: 8080
