@@ -87,8 +87,9 @@ spec:
             {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12 }}
           envFrom:
             - configMapRef:
-                name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap
+                name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap{% endraw %}
       {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
+      {% raw %}
       initContainers:
         - name: init-rabbitmq-queue
           image: "{{ .Values.amqpConnect.repository }}:{{ .Values.amqpConnect.tag }}"
@@ -97,8 +98,9 @@ spec:
           command: ['python', '-m', 'check_amqp_connection.py']
           env:
             {{- include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
-
+      {% endraw %}
       {% endif -%}
+      {% raw %}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
