@@ -1,5 +1,5 @@
 {
-    "app_slug": "project_name",
+    "app_slug": "project-name",
     "description": "Chart for the {{ cookiecutter.app_slug.replace(' ', '_') }} service",
     "image_repo": "quay.io/blueshoe/dj-hurricane-base",
     "registry_username": "",
