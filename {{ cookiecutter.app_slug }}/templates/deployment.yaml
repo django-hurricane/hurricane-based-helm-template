@@ -91,6 +91,24 @@ spec:
       {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
       {% raw %}
       initContainers:
+        {{- if and .Values.volumePermissions.enabled .Values.podSecurityContext }}
+        - name: volume-permissions
+          image: docker.io/bitnami/bitnami-shell:10-debian-10-r125
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - chown -R "{{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "{{ default "/var/django/" .Values.assets.assetsMountPath }}"
+          securityContext:
+            runAsUser: 0
+          {{- if .Values.volumePermissions.resources }}
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: assets
+              mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
+        {{- end }}
         - name: init-rabbitmq-queue
           image: "{{ .Values.amqpConnect.repository }}:{{ .Values.amqpConnect.tag }}"
           imagePullPolicy: {{ .Values.amqpConnect.pullPolicy }}

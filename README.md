@@ -31,3 +31,13 @@ Create a new Helm chart with
 cookiecutter gh:Blueshoe/hurricane-based-helm-template
 ```
 and answer the questions accordingly.
+
+# Volumes
+It is generally considered more secure to run containers with a user other than `root`. Our
+Dockerfiles usually incorporate a special user to run the application. For development
+environments such as `k3d` we're using `local-path` provisioner for local volume creation.
+This storage class does not honor the `fsGroup` option and volumes get still mounted with `root` owner 
+which leads to permission issues.  
+Anyway, you can set `volumePermissions.enabled: true` which starts an `initContainer` that simply
+`chown`s the requested volume mounts. However, you have to set 
+`podSecurityContext.fsGroup and podSecurityContext.runAsUser` to make this work. 
