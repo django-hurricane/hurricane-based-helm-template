@@ -35,6 +35,9 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+volumePermissions:
+  enabled: false
+
 service:
   type: ClusterIP
   port: 8080
