@@ -37,7 +37,18 @@ Anyway, `volumePermissions.enabled: true` is set as default, which starts an `in
 `chown`s the requested volume mounts. However, you have to set 
 `podSecurityContext.fsGroup and podSecurityContext.runAsUser` to make this work. 
 
-## How can I test my generated charts
+## Use OAuth2Proxy?
+
+For a robust _OpenID Connect_ integration we prefer to deploy the [OAuth2-Proxy}(https://oauth2-proxy.github.io/oauth2-proxy/) in
+a _sidecar pattern_ scenario. The architecture is then as depicted in the following image.
+![Pycloak Architecture](docs/static/img/pycloak-arch.png?raw=true "Architecture")
+Django will be additionally equipped with [pycloak](https://github.com/Blueshoe/pycloak) in order to use an external
+_OpenID identity provider_, such as [Keycloak](https://www.keycloak.org/), for user and permission management. Once you
+answer Cookiecutters "use_oauth2_proxy" with "yes", you will get the sidecare specification prepared.  
+**Beware:** the Helm charts wont come up without the OIDC provider running at the specified location.  
+
+
+## How can I test my generated charts?
 
 The simplest solution to test your generated Helm charts is by applying them to an ephemeral cluster using `k3d`.
 
@@ -55,4 +66,9 @@ helm dep up <appname>/
 ### Install the charts
 ```bash
 helm install my-release <appname>/
+```
+and keep an eye on the Pods running
+### Install the charts
+```bash
+kubectl get pods
 ```

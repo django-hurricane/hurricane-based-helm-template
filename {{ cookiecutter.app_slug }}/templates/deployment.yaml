@@ -40,6 +40,45 @@ spec:
             claimName: {% endraw %}{{ cookiecutter.app_slug }}-pvc{% raw %}
       {{ end }}
       containers:
+        {% endraw -%}
+        {% if cookiecutter.use_oauth2_proxy == "yes" %}
+        {% raw -%}
+        - name: oauth2-proxy
+          image: {{ .Values.oauth2proxy.image.repository }}:{{ .Values.oauth2proxy.image.tag }}
+          imagePullPolicy: {{ .Values.oauth2proxy.image.pullPolicy }}
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.oauth2proxy.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: {{ .Values.oauth2proxy.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          ports:
+            - containerPort: {{ .Values.oauth2proxy.containerPort }}
+              protocol: TCP
+              name: {{ .Values.containerPort.name }}
+          envFrom:
+            - configMapRef:
+                name: {% endraw %}{{ cookiecutter.app_slug }}-oauth2proxy{% raw %}
+          {{- if (eq .Values.global.environment "development") }}
+            - configMapRef:
+                name: {% endraw %}{{ cookiecutter.app_slug }}-configmap{% raw %}
+          env:
+            {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12 }}
+            {% endraw %}{% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}{% raw %}
+            {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
+            {% endraw -%}
+            {%- endif -%}
+            {% raw -%}
+          {{- end }}
+        {% endraw -%}
+        {% endif -%}
+        {% raw -%}
         - name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -61,7 +100,7 @@ spec:
                   {{ end -}}
                  "]
           ports:
-            - name: {{ .Values.containerPort.name }}
+            - name: {{ .Values.containerPort.name }}{% endraw %}{% if cookiecutter.use_oauth2_proxy == "yes" %}-intern{% endif %}{% raw %}
               containerPort: {{ .Values.containerPort.portNumber }}
               protocol: TCP
           livenessProbe:

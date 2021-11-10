@@ -5,6 +5,7 @@
     "registry_username": "",
     "registry_password": "",
     "postgresql_version": "10.13.7",
+    "use_oauth2_proxy": ["no", "yes"],
     "use_celery_worker": ["yes", "no"],
     "use_celery_beat": ["yes", "no"],
     "use_rabbitmq": ["yes", "no"],
