@@ -40,8 +40,10 @@ Anyway, `volumePermissions.enabled: true` is set as default, which starts an `in
 ## Use OAuth2Proxy?
 
 For a robust _OpenID Connect_ integration we prefer to deploy the [OAuth2-Proxy}(https://oauth2-proxy.github.io/oauth2-proxy/) in
-a _sidecar pattern_ scenario. The architecture is then as depicted in the following image.
-![Pycloak Architecture](docs/static/img/pycloak-arch.png?raw=true "Architecture")
+a _sidecar pattern_ scenario. The architecture is then as depicted in the following image.  
+
+![Pycloak Architecture](docs/static/img/pycloak-arch.png?raw=true "Architecture")  
+
 Django will be additionally equipped with [pycloak](https://github.com/Blueshoe/pycloak) in order to use an external
 _OpenID identity provider_, such as [Keycloak](https://www.keycloak.org/), for user and permission management. Once you
 answer Cookiecutters "use_oauth2_proxy" with "yes", you will get the sidecare specification prepared.  
