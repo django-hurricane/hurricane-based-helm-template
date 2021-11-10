@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django_celery_beat",
     "hurricane",
 ]
 
@@ -147,3 +148,5 @@ LOGGING = {
         },
     },
 }
+
+CELERY_ALWAYS_EAGER = False

@@ -1,0 +1,157 @@
+{% macro random_char(len) -%}
+  {% for n in range(len) %}
+    {{- cookiecutter.__alphabet|random -}}
+  {% endfor %}
+{%- endmacro -%}
+
+{% macro gen_secret(group_len=6) -%}
+  {% set parts %}
+      {{- random_char(group_len) -}}
+  {% endset %}
+  {{- parts|join("") -}}
+{%- endmacro -%}
+
+# Default values for {{ cookiecutter.app_slug }}.
+# All values default to development scenarios. They are to be overwritten for production-close environments.
+# These variables are shared across all environments
+
+replicaCount: 1
+
+image:
+  repository: {{ cookiecutter.image_repo }}
+  tag: latest
+  pullPolicy: Always
+
+{% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
+amqpConnect:
+  repository: {{ cookiecutter.ampq_connect_image_repo }}
+  tag: master
+  pullPolicy: Always
+{% endif -%}
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+
+containerPort:
+  name: dj-hurricane
+  portNumber: {{ range(8080, 9090) | random }}
+
+containerProbePort: {{ range(8080, 9090) | random }}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+
+volumePermissions:
+  enabled: true
+
+service:
+  type: ClusterIP
+  port:
+    portNumber: 8080
+    name: http
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+#
+# Values for development environments
+#
+
+global:
+  postgresql:
+    postgresqlUsername: {{ cookiecutter.app_slug }}_dev
+    existingSecret: {{ cookiecutter.app_slug }}-django-secrets
+
+environmentVariables:
+  DJANGO_DEBUG: True
+  DJANGO_ALLOWED_HOSTS: '*'
+
+useLocalAssetVolume: true
+
+assets:
+  assetsMountPath: "/var/django"
+  mediaPathPrefix: "/media/"
+  staticPathPrefix: "/static/"
+
+deploymentAnnotations: {}
+deploymentLabels: {}
+
+ingress:
+  enabled: true
+  enableLetsencrypt: false
+  annotations: []
+  hosts:
+    {{ cookiecutter.app_slug }}.dev.127.0.0.1.nip.io:
+      path: /
+      serviceName: {{ cookiecutter.app_slug }}
+      servicePort: 8080
+  tls: []
+
+{% if cookiecutter.use_rabbitmq == "yes" -%}
+rabbitmq:
+  enabled: true
+  volumePermissions:
+    enabled: true
+  auth:
+    username: {{ cookiecutter.app_slug }}
+    existingPasswordSecret: {{ cookiecutter.app_slug }}-rabbitmq-custom
+    existingErlangSecret: {{ cookiecutter.app_slug }}-rabbitmq-custom
+  vhost: /
+  password: {{ gen_secret(32) }}
+  erlangSecret: {{ gen_secret(32) }}
+{% endif -%}
+
+{% set image_parts = cookiecutter.image_repo.split("/") -%}
+imageCredentials:
+  registry: {{ image_parts.0 }}
+  username: {{ cookiecutter.registry_username }}
+  password: {{ cookiecutter.registry_password }}
+
+#
+# These variables generate a Kubernetes Secret with the following variables added to the containers ENV.
+# If you add variables here, please add the mapping in _env.tpl, too
+#
+secretEnvironmentVariables:
+    DJANGO_SECRET_KEY: {{ gen_secret(85) }}
+    DJANGO_USE_S3: "False"
+    DJANGO_AWS_S3_ACCESS_KEY_ID: "set-me"
+    DJANGO_AWS_S3_SECRET_ACCESS_KEY: "set-me"
+    DJANGO_AWS_S3_BUCKET_NAME: "set-me"
+    DJANGO_AWS_REGION: "set-me"
+
+postgresql:
+    enabled: true
+    postgresqlDatabase: {{ cookiecutter.app_slug }}
+    postgresqlPassword: {{ gen_secret(6) }}
+    volumePermissions:
+      enabled: true

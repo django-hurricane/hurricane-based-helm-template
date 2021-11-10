@@ -16,11 +16,6 @@ Firstly, you will need to install [cookiecutter](https://cookiecutter.readthedoc
 ```bash
 pip install cookiecutter
 ```
-If you want to encrypt the secret Helm values, please install [gnupg](https://docs.red-dove.com/python-gnupg/),
-too.
-```bash
-pip install python-gnupg
-```
 
 ---
 
@@ -38,6 +33,26 @@ Dockerfiles usually incorporate a special user to run the application. For devel
 environments such as `k3d` we're using `local-path` provisioner for local volume creation.
 This storage class does not honor the `fsGroup` option and volumes get still mounted with `root` owner 
 which leads to permission issues.  
-Anyway, you can set `volumePermissions.enabled: true` which starts an `initContainer` that simply
+Anyway, `volumePermissions.enabled: true` is set as default, which starts an `initContainer` that simply
 `chown`s the requested volume mounts. However, you have to set 
 `podSecurityContext.fsGroup and podSecurityContext.runAsUser` to make this work. 
+
+## How can I test my generated charts
+
+The simplest solution to test your generated Helm charts is by applying them to an ephemeral cluster using `k3d`.
+
+### Create a local custer
+```bash
+k3d cluster create my-test
+```
+Make sure your local `kubectl` connection is set to the cluster which you just created.
+
+### Prepare Helm dependencies
+```bash
+helm dep up <appname>/
+```
+
+### Install the charts
+```bash
+helm install my-release <appname>/
+```
