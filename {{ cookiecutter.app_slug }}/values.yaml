@@ -42,11 +42,15 @@ podSecurityContext:
   fsGroup: 1000
   runAsUser: 1000
 
-containerPort:
-  name: dj-hurricane
-  portNumber: {{ range(8080, 9090) | random }}
+{% set containerPortNumber = range(8000, 8500) | random %}
+{% set oauth2ContainerPortNumber = range(8501, 9000) | random %}
+{% set containerProbePortNumber = range(9001, 9500) | random %}
 
-containerProbePort: {{ range(8080, 9090) | random }}
+containerPort:
+  name: http
+  portNumber: {{ containerPortNumber}}
+
+containerProbePort: {{ containerProbePortNumber }}
 
 securityContext:
   runAsNonRoot: true
@@ -88,6 +92,7 @@ affinity: {}
 #
 
 global:
+  environment: "development"
   postgresql:
     postgresqlUsername: {{ cookiecutter.app_slug }}_dev
     existingSecret: {{ cookiecutter.app_slug }}-django-secrets
@@ -105,6 +110,44 @@ assets:
 
 deploymentAnnotations: {}
 deploymentLabels: {}
+
+{% if cookiecutter.use_oauth2_proxy == "yes" -%}
+oauth2proxy:
+  image:
+    repository: quay.io/oauth2-proxy/oauth2-proxy
+    tag: v7.0.1
+    pullPolicy: Always
+  containerPort: {{ oauth2ContainerPortNumber }}
+  settings:
+    client_id: my-client
+    client_secret: my-secret
+    # docker run -ti --rm python:3-alpine python -c 'import secrets,base64; print(base64.b64encode(base64.b64encode(secrets.token_bytes(16))));'
+    cookie_secret: "rXPajRXVoIINCXz/xJIC1w=="
+    provider: oidc
+    email_domain: "*"
+    scope: openid
+    upstream: http://127.0.0.1:{{ containerPortNumber }}
+    http_address: 0.0.0.0:{{ oauth2ContainerPortNumber }}
+    proxy_prefix: /oauth2
+    login_url: http://keycloak.127.0.0.1.nip.io:61346/auth/realms/master/protocol/openid-connect/auth
+    redeem_url: http://keycloak-http/auth/realms/master/protocol/openid-connect/token
+    validate_url: http://keycloak-http/auth/realms/master/protocol/openid-connect/userinfo
+    redirect_url: http://app.127.0.0.1.nip.io:61346/content/oauth2/callback
+    skip_auth_preflight: true
+    skip_jwt_bearer_tokens: true
+    skip_auth_route: "GET: /schema.json"
+    cookie_httponly: true
+    cookie_secure: false
+    cookie_samesite: lax
+    cookie_domain: "*"
+    cookie_refresh: 1m
+    standard_logging: true
+    auth_logging: true
+    request_logging: true
+    pass_access_token: true
+    oidc_issuer_url: http://keycloak.127.0.0.1.nip.io:61346/auth/realms/master
+    oidc_jwks_url: http://keycloak-http/auth/realms/master/protocol/openid-connect/certs
+{% endif -%}
 
 ingress:
   enabled: true
