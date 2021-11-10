@@ -9,10 +9,10 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - port: {{ .Values.service.port.portNumber }}
+      targetPort: {{ .Values.containerPort.name }}
       protocol: TCP
-      name: http
+      name: {{ .Values.service.port.name }}
   selector:
     {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %} . | nindent 4 }}
 

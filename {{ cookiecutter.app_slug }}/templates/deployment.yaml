@@ -54,41 +54,45 @@ spec:
           args: ["python manage.py serve
                   --command 'migrate'
                   --command 'collectstatic --no-input'
-                  --port {{ .Values.service.port }}
-                  --probe-port 9001
+                  --port {{ .Values.containerPort.portNumber }}
+                  --probe-port {{ .Values.containerProbePort }}
                   {{- if .Values.useLocalAssetVolume }}
                   --static
                   {{ end -}}
                  "]
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - name: {{ .Values.containerPort.name }}
+              containerPort: {{ .Values.containerPort.portNumber }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /alive
-              port: 9001
+              port: {{ .Values.containerProbePort }}
             periodSeconds: 10
             failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /ready
-              port: 9001
+              port: {{ .Values.containerProbePort }}
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
           startupProbe:
             httpGet:
               path: /startup
-              port: 9001
+              port: {{ .Values.containerProbePort }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12 }}
+          {% endraw %}{% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}{% raw %}
+            {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
+          {% endraw -%}
+          {%- endif -%}
+          {% raw %}
           envFrom:
             - configMapRef:
                 name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap{% endraw %}
-      {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
       {% raw %}
       initContainers:
         {{- if and .Values.volumePermissions.enabled .Values.podSecurityContext }}
@@ -109,6 +113,9 @@ spec:
             - name: assets
               mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
         {{- end }}
+        {% endraw %}
+        {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
+        {% raw %}
         - name: init-rabbitmq-queue
           image: "{{ .Values.amqpConnect.repository }}:{{ .Values.amqpConnect.tag }}"
           imagePullPolicy: {{ .Values.amqpConnect.pullPolicy }}
@@ -116,8 +123,8 @@ spec:
           command: ['python', '-m', 'check_amqp_connection.py']
           env:
             {{- include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
-      {% endraw %}
-      {% endif -%}
+        {% endraw %}
+        {% endif -%}
       {% raw %}
       {{- with .Values.nodeSelector }}
       nodeSelector:

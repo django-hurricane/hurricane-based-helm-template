@@ -35,7 +35,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 56 | trimSuffix "-" -}}-worker
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}-worker
+{{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 56 | trimSuffix "-" -}}-worker
 {{- else -}}
@@ -53,7 +53,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 58 | trimSuffix "-" -}}-beat
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}-beat
+{{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 58 | trimSuffix "-" -}}-beat
 {{- else -}}

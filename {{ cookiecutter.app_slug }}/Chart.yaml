@@ -10,16 +10,16 @@ version: 0.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-#appVersion: 1.16.0
+# appVersion: 0.1.0
 
 dependencies:
 - name: postgresql
   version: {{ cookiecutter.postgresql_version }}
   repository: https://charts.bitnami.com/bitnami/
-  condition: global.postgresql.enabled
+  condition: postgresql.enabled
 {%- if cookiecutter.use_rabbitmq == "yes" %}
 - name: rabbitmq
   version: {{ cookiecutter.rabbitmq_version }}
   repository: https://charts.bitnami.com/bitnami/
-  condition: global.postgresql.enabled
+  condition: rabbitmq.enabled
 {%- endif %}

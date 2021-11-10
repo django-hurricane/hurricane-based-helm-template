@@ -42,22 +42,11 @@ spec:
           args: ["-A", "configuration.celery.app",
                  "beat",
                  "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariables"{% raw %} . | nindent 12}}
+            {{ include {% endraw %}"{{ cookiecutter.app_slug }}.envVariablesAmqpConnect"{% raw %} . | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap
