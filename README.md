@@ -1,5 +1,8 @@
 # hurricane-based-helm-template
-This is a cookiecutter template for *Django-Hurricane*-based Helm charts.
+This is a cookiecutter template for *Django-Hurricane*-based Helm charts.  
+It provides workload manifests for a Django deployment and a PostgreSQL. In addition, you
+can generate a [Celery](https://docs.celeryproject.org/en/stable/index.html) setup with RabbitMQ as broker,
+a Celery worker and beat deployment.
 
 ---
 
@@ -39,7 +42,7 @@ Anyway, `volumePermissions.enabled: true` is set as default, which starts an `in
 
 ## Use OAuth2Proxy?
 
-For a robust _OpenID Connect_ integration we prefer to deploy the [OAuth2-Proxy}(https://oauth2-proxy.github.io/oauth2-proxy/) in
+For a robust _OpenID Connect_ integration we prefer to deploy the [OAuth2-Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) in
 a _sidecar pattern_ scenario. The architecture is then as depicted in the following image.  
 
 ![Pycloak Architecture](docs/static/img/pycloak-arch.png?raw=true "Architecture")  
