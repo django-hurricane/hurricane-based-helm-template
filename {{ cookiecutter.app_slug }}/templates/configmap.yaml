@@ -29,9 +29,9 @@ data:
   OAUTH2_PROXY_CLIENT_SECRET: {{ .Values.oauth2proxy.settings.client_secret | quote }}
   OAUTH2_PROXY_COOKIE_SECRET: {{ .Values.oauth2proxy.settings.cookie_secret | quote }}
   OAUTH2_PROXY_PROVIDER: {{ .Values.oauth2proxy.settings.provider | quote }}
-  OAUTH2_PROXY_EMAIL_DOMAIN: {{ .Values.oauth2proxy.settings.email_domain | quote }}
+  OAUTH2_PROXY_EMAIL_DOMAINS: {{ .Values.oauth2proxy.settings.email_domain | quote }}
   OAUTH2_PROXY_SCOPE: {{ .Values.oauth2proxy.settings.scope | quote }}
-  OAUTH2_PROXY_UPSTREAM: {{ .Values.oauth2proxy.settings.upstream | quote }}
+  OAUTH2_PROXY_UPSTREAMS: {{ .Values.oauth2proxy.settings.upstream | quote }}
   OAUTH2_PROXY_HTTP_ADDRESS: {{ .Values.oauth2proxy.settings.http_address | quote }}
   OAUTH2_PROXY_PROXY_PREFIX: {{ .Values.oauth2proxy.settings.proxy_prefix | quote }}
   OAUTH2_PROXY_LOGIN_URL: {{ .Values.oauth2proxy.settings.login_url | quote }}
@@ -40,11 +40,11 @@ data:
   OAUTH2_PROXY_REDIRECT_URL: {{ .Values.oauth2proxy.settings.redirect_url | quote }}
   OAUTH2_PROXY_SKIP_AUTH_PREFLIGHT: {{ .Values.oauth2proxy.settings.skip_auth_preflight | quote }}
   OAUTH2_PROXY_SKIP_JWT_BEARER_TOKENS: {{ .Values.oauth2proxy.settings.skip_jwt_bearer_tokens | quote }}
-  OAUTH2_PROXY_SKIP_AUTH_ROUTE: {{ .Values.oauth2proxy.settings.skip_auth_route | quote }}
+  OAUTH2_PROXY_SKIP_AUTH_ROUTES: {{ .Values.oauth2proxy.settings.skip_auth_route | quote }}
   OAUTH2_PROXY_COOKIE_HTTPONLY: {{ .Values.oauth2proxy.settings.cookie_httponly | quote }}
   OAUTH2_PROXY_COOKIE_SECURE: {{ .Values.oauth2proxy.settings.cookie_secure | quote }}
   OAUTH2_PROXY_COOKIE_SAMESITE: {{ .Values.oauth2proxy.settings.cookie_samesite | quote }}
-  OAUTH2_PROXY_COOKIE_DOMAIN: {{ .Values.oauth2proxy.settings.cookie_domain | quote }}
+  OAUTH2_PROXY_COOKIE_DOMAINS: {{ .Values.oauth2proxy.settings.cookie_domain | quote }}
   OAUTH2_PROXY_COOKIE_REFRESH: {{ .Values.oauth2proxy.settings.cookie_refresh | quote }}
   OAUTH2_PROXY_STANDARD_LOGGING: {{ .Values.oauth2proxy.settings.standard_logging | quote }}
   OAUTH2_PROXY_AUTH_LOGGING: {{ .Values.oauth2proxy.settings.auth_logging | quote }}
@@ -52,5 +52,6 @@ data:
   OAUTH2_PROXY_PASS_ACCESS_TOKEN: {{ .Values.oauth2proxy.settings.pass_access_token | quote }}
   OAUTH2_PROXY_OIDC_ISSUER_URL: {{ .Values.oauth2proxy.settings.oidc_issuer_url | quote }}
   OAUTH2_PROXY_OIDC_JWKS_URL: {{ .Values.oauth2proxy.settings.oidc_jwks_url | quote }}
+  OAUTH2_PROXY_SKIP_OIDC_DISCOVERY: {{ .Values.oauth2proxy.settings.skip_oidc_discovery | quote }}
 {% endraw -%}
 {% endif %}

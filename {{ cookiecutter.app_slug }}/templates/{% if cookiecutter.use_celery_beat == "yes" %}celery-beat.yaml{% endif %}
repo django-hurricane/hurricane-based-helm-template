@@ -28,7 +28,7 @@ spec:
         {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabelsBeat"{% raw %} . | nindent 8 }}
     spec:
       imagePullSecrets:
-        - name: robot-pull-secret
+        - name: {% endraw %}"{{ cookiecutter.app_slug }}-robot-pull-secret"{% raw %}
       serviceAccountName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.serviceAccountName"{% raw %} . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

@@ -147,6 +147,7 @@ oauth2proxy:
     pass_access_token: true
     oidc_issuer_url: http://keycloak.127.0.0.1.nip.io:61346/auth/realms/master
     oidc_jwks_url: http://keycloak-http/auth/realms/master/protocol/openid-connect/certs
+    skip_oidc_discovery: true
 {% endif -%}
 
 ingress:
