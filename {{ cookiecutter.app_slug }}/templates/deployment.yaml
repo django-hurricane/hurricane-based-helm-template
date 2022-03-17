@@ -12,7 +12,7 @@ metadata:
   {{- if .Values.deploymentAnnotations }}
   annotations:
     {{- toYaml .Values.deploymentAnnotations | nindent 4 }}
-  {{- end}}
+  {{- end }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -24,21 +24,20 @@ spec:
       annotations:
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
-        {{- end}}
+        {{- end }}
       labels:
         {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabels"{% raw %} . | nindent 8 }}
     spec:
+      {%- endraw -%}
+      {% if cookiecutter.use_imagePullSecret == "yes" %}
+      {% raw -%}
       imagePullSecrets:
-        - name: {% endraw %}"{{ cookiecutter.app_slug }}-robot-pull-secret"{% raw %}
+        - name: {% endraw %}"{{ cookiecutter.app_slug }}-robot-pull-secret"
+      {%- endif %}
+      {% raw -%}
       serviceAccountName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.serviceAccountName"{% raw %} . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.useLocalAssetVolume }}
-      volumes:
-        - name: assets
-          persistentVolumeClaim:
-            claimName: {% endraw %}{{ cookiecutter.app_slug }}-pvc{% raw %}
-      {{ end }}
       containers:
         {% endraw -%}
         {% if cookiecutter.use_oauth2_proxy == "yes" %}
@@ -84,19 +83,17 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.useLocalAssetVolume }}
-          volumeMounts:
-            - mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
-              name: assets
-          {{ end }}
           command: ["/bin/sh","-c"]
           args: ["python manage.py serve
                   --command 'migrate'
                   --command 'collectstatic --no-input'
                   --port {{ .Values.containerPort.portNumber }}
                   --probe-port {{ .Values.containerProbePort }}
-                  {{- if .Values.useLocalAssetVolume }}
+                  {{- if .Values.serveStatic }}
                   --static
+                  {{ end -}}
+                  {{- if .Values.serveMedia }}
+                  --media
                   {{ end -}}
                  "]
           ports:
@@ -134,24 +131,6 @@ spec:
                 name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-configmap{% endraw %}
       {% raw %}
       initContainers:
-        {{- if and .Values.volumePermissions.enabled .Values.podSecurityContext }}
-        - name: volume-permissions
-          image: docker.io/bitnami/bitnami-shell:10-debian-10-r125
-          imagePullPolicy: "IfNotPresent"
-          command:
-            - /bin/bash
-          args:
-            - -ec
-            - chown -R "{{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "{{ default "/var/django/" .Values.assets.assetsMountPath }}"
-          securityContext:
-            runAsUser: 0
-          {{- if .Values.volumePermissions.resources }}
-          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: assets
-              mountPath: {{ default "/var/django/" .Values.assets.assetsMountPath }}
-        {{- end }}
         {% endraw %}
         {% if cookiecutter.use_celery_worker == "yes" or cookiecutter.use_celery_beat == "yes" -%}
         {% raw %}
@@ -177,6 +156,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-
 
 {%- endraw %}

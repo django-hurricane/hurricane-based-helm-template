@@ -9,8 +9,10 @@ data:
   {{- range $key, $val := .Values.environmentVariables }}
   {{ $key }}: {{ $val | quote }}
   {{- end }}
-  {{- if .Values.useLocalAssetVolume }}
+  {{- if .Values.serveStatic }}
   DJANGO_STATIC_ROOT: {{ .Values.assets.assetsMountPath }}{{ .Values.assets.staticPathPrefix }}
+  {{ end }}
+  {{- if .Values.serveMedia }}
   DJANGO_MEDIA_ROOT: {{ .Values.assets.assetsMountPath }}{{ .Values.assets.mediaPathPrefix }}
   {{ end }}
 

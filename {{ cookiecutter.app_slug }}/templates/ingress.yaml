@@ -28,7 +28,7 @@ spec:
           backend:
             serviceName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} $ }}
             servicePort: {{ $backend.servicePort }}
-    {{- end}}
+    {{- end }}
 {{- end }}
 
 {%- endraw %}
