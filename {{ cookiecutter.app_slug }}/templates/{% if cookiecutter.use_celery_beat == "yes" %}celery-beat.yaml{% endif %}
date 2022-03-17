@@ -7,11 +7,11 @@ metadata:
     {{- include {% endraw %}"{{ cookiecutter.app_slug }}.labelsBeat"{% raw %} . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
     {{- toYaml .Values.deploymentLabels | nindent 4 }}
-    {{- end}}
+    {{- end }}
   {{- if .Values.deploymentAnnotations }}
   annotations:
     {{- toYaml .Values.deploymentAnnotations | nindent 4 }}
-  {{- end}}
+  {{- end }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -23,7 +23,7 @@ spec:
       annotations:
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
-        {{- end}}
+        {{- end }}
       labels:
         {{- include {% endraw %}"{{ cookiecutter.app_slug }}.selectorLabelsBeat"{% raw %} . | nindent 8 }}
     spec:
