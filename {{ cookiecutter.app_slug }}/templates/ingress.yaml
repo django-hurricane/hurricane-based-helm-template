@@ -1,7 +1,7 @@
 {% raw -%}
 
 {{- if .Values.ingress.enabled -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {% endraw %}{{ cookiecutter.app_slug }}{% raw %}-ingress
@@ -25,9 +25,12 @@ spec:
       http:
         paths:
         - path: {{ $backend.path }}
+          pathType: {{ $backend.pathType}}
           backend:
-            serviceName: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} $ }}
-            servicePort: {{ $backend.servicePort }}
+            service:
+              name: {{ include {% endraw %}"{{ cookiecutter.app_slug }}.fullname"{% raw %} $ }}
+              port:
+                number: {{ $backend.servicePort }}
     {{- end }}
 {{- end }}
 

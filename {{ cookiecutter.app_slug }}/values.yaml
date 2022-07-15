@@ -158,6 +158,7 @@ ingress:
   hosts:
     {{ cookiecutter.app_slug }}.dev.127.0.0.1.nip.io:
       path: /
+      pathType: Prefix
       serviceName: {{ cookiecutter.app_slug }}
       servicePort: 8080
   tls: []
